@@ -6,23 +6,15 @@ import (
 	"net/http"
 
 	"github.com/fanialfi/golang-sql/database"
+	"github.com/fanialfi/golang-sql/model"
 
 	// driver di import namun perlu ditambahkan _
 	// karena meskipun di butuhkan package "database/sql", namun kita tidak langsung berinteraksi dengan driver tersebut
 	_ "github.com/go-sql-driver/mysql"
 )
 
-// skema struct ini disiapkan sama seperti skema pada table tb_student yang ada di database
-// yang digunakan sebagai tipe data penampung hasil query
-type Student struct {
-	Id    string `json:"identitas"`
-	Age   int    `json:"umur"`
-	Name  string `json:"nama"`
-	Grade int    `json:"kelas"`
-}
-
 func HandleUsers(res http.ResponseWriter, req *http.Request) {
-	data, err := queryUsers(database.Driver, database.DataSource)
+	data, err := queryUsers()
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
@@ -39,8 +31,8 @@ func HandleUsers(res http.ResponseWriter, req *http.Request) {
 }
 
 // function ini digunakan untuk melakukan query ke database di DBMS
-func queryUsers(driverName, dataSourceName string) ([]Student, error) {
-	db, err := database.Connect(driverName, dataSourceName)
+func queryUsers() ([]model.Student, error) {
+	db, err := database.Connect()
 	if err != nil {
 		fmt.Printf("line 39 %s", err.Error())
 		return nil, err
@@ -63,12 +55,12 @@ func queryUsers(driverName, dataSourceName string) ([]Student, error) {
 	defer rows.Close()
 
 	// digunakan untuk menampung hasil query
-	var result []Student
+	var result []model.Student
 
 	// perulangan dilakukan sebanyak berapa record yang berhasil di query
 	// perulangan dengan kondisi acuan rows.Next() ini dilakukan sebanyak jumplah total record yang ada
 	for rows.Next() {
-		each := Student{}
+		each := model.Student{}
 
 		// setelah di iterasi tiap tiap rows,
 		// method rows.Scan() digunakan untuk mengambil nilai record yang sedang diiterasi dan kemudian disimpan kedalam variabel poiter

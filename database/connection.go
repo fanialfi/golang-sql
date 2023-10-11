@@ -5,12 +5,12 @@ import (
 )
 
 const (
-	Driver     = "mysql"
-	DataSource = "root:@tcp(127.0.0.1:3306)/db_belajar_golang"
+	driver     = "mysql"
+	dataSource = "root:@tcp(127.0.0.1:3306)/db_belajar_golang"
 )
 
 // function ini digunakan untuk membuat / membuka koneksi ke database
-func Connect(driverName, dataSourceName string) (*sql.DB, error) {
+func Connect() (*sql.DB, error) {
 	// sql.Open() digunakan untuk memulai koneksi dengan database
 	// didalamnya terdapat 2 parameter mandatory (wajib) => nama driver dan koneksi string
 	//
@@ -20,7 +20,11 @@ func Connect(driverName, dataSourceName string) (*sql.DB, error) {
 	//
 	// user:password@tcp(host/url:port)/db_name
 	// user@tcp(host/url:port)/db_name
-	db, err := sql.Open(driverName, dataSourceName)
+	db, err := sql.Open(driver, dataSource)
+	if err != nil {
+		return nil, err
+	}
+	err = db.Ping()
 	if err != nil {
 		return nil, err
 	}

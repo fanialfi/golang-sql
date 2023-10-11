@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fanialfi/golang-sql/database"
+	"github.com/fanialfi/golang-sql/model"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -15,7 +16,7 @@ func Prepare(res http.ResponseWriter, req *http.Request) {
 // teknik prepare adalah teknik penulisan query di awal dengan kelebihan bisa di re-use digunakan berkali kali
 // method ini bisa digabung / dichain dengan method Query() atau QueryRow()
 func sqlPrepare() {
-	db, err := database.Connect(database.Driver, database.DataSource)
+	db, err := database.Connect()
 	if err != nil {
 		fmt.Println(err.Error())
 		return
@@ -32,18 +33,18 @@ func sqlPrepare() {
 	// dari object stmt method QueryRow dipanggil beberapa kali dengan paameter adalah id untuk nanatinya dikirim
 	// sebagai pelengkap query pada db.Prepare
 
-	result1 := Student{}
+	result1 := model.Student{}
 	stmt.QueryRow("B001").Scan(&result1.Name, &result1.Grade)
 	fmt.Printf("name: %s\ngrade: %d\n", result1.Name, result1.Grade)
 	fmt.Printf("%#v\n", result1)
 	defer stmt.Close()
 
-	result2 := Student{}
+	result2 := model.Student{}
 	stmt.QueryRow("B003").Scan(&result2.Name, &result2.Grade)
 	fmt.Printf("name: %s\ngrade: %d\n", result2.Name, result2.Grade)
 	fmt.Printf("%#v\n", result2)
 
-	result3 := Student{}
+	result3 := model.Student{}
 	stmt.QueryRow("B003").Scan(&result3.Name, &result3.Grade)
 	fmt.Printf("name: %s\ngrade: %d\n", result3.Name, result3.Grade)
 	fmt.Printf("%#v\n", result3)

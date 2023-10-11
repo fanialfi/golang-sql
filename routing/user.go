@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/fanialfi/golang-sql/crud"
 	"github.com/fanialfi/golang-sql/database"
+	"github.com/fanialfi/golang-sql/model"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -13,8 +15,9 @@ func HandleUser(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("Content-Type", "application/json")
 	id := req.URL.Query().Get("id")
 
-	if req.Method == http.MethodGet {
-		data, err := queryUser(database.Driver, database.DataSource, id)
+	switch req.Method {
+	case http.MethodGet:
+		data, err := queryUser(id)
 		if err != nil {
 			fmt.Println(err.Error())
 
@@ -30,16 +33,38 @@ func HandleUser(res http.ResponseWriter, req *http.Request) {
 		}
 
 		res.Write(dataByte)
-	} else {
+
+	case http.MethodDelete:
+		res.Header().Set("Content-Type", "application/json")
+
+		data, err := crud.ExecDelete(id)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		responseMessage := model.Response{
+			Status: http.StatusOK,
+			Msg:    data,
+			Data:   nil,
+		}
+		responseByte, err := json.Marshal(responseMessage)
+		if err != nil {
+			http.Error(res, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		res.Write(responseByte)
+	default:
 		http.Error(res, "", http.StatusBadRequest)
 		return
 	}
 }
 
-func queryUser(driverName, dataSourceName, id string) (Student, error) {
-	var data = Student{}
+func queryUser(id string) (model.Student, error) {
+	var data = model.Student{}
 
-	db, err := database.Connect(driverName, dataSourceName)
+	db, err := database.Connect()
 	if err != nil {
 		return data, err
 	}
